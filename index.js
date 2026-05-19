@@ -96,8 +96,7 @@ async function fetchHandler(e) {
         return makeRes('Unauthorized', 401)
     }
     if (tokenFromPath) {
-        const targetPath = '/' + parts.slice(1).join('/')
-        const target = targetPath.replace(/^\/+/, '')
+        const target = decodeURIComponent(parts.slice(1).join('/'))
         if (target.search(/^(?:https?:\/\/)?github\.com\//i) === 0 ||
             target.search(/^(?:https?:\/\/)?raw\.(?:githubusercontent|github)\.com\//i) === 0 ||
             target.search(/^(?:https?:\/\/)?gist\.(?:githubusercontent|github)\.com\//i) === 0) {
