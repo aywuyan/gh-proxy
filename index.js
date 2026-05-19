@@ -76,11 +76,11 @@ function checkUrl(u) {
     return false
 }
 
-function checkAuth(req) {
+function checkAuth(req, tokenFromPath = '') {
     if (!AUTH_TOKEN) return true
     const auth = req.headers.get('authorization') || ''
     const bearer = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : ''
-    const token = bearer || new URL(req.url).searchParams.get('token') || ''
+    const token = bearer || tokenFromPath || new URL(req.url).searchParams.get('token') || ''
     return token === AUTH_TOKEN
 }
 
@@ -89,8 +89,15 @@ function checkAuth(req) {
  */
 async function fetchHandler(e) {
     const req = e.request
-    if (!checkAuth(req)) {
+    const urlObjAuth = new URL(req.url)
+    const parts = urlObjAuth.pathname.split('/').filter(Boolean)
+    const tokenFromPath = parts.length ? parts[0] : ''
+    if (!checkAuth(req, tokenFromPath)) {
         return makeRes('Unauthorized', 401)
+    }
+    if (tokenFromPath) {
+        urlObjAuth.pathname = '/' + parts.slice(1).join('/')
+        return fetch(new Request(urlObjAuth.toString(), req))
     }
     const urlStr = req.url
     const urlObj = new URL(urlStr)
