@@ -46,6 +46,32 @@ github release、archive以及项目文件的加速项目，支持clone，有Clo
 
 - gist：https://gist.githubusercontent.com/cielpy/351557e6e465c12986419ac5a4dd2568/raw/cmd.py
 
+## 自定义配置
+
+### 可选：Token 鉴权（Worker 版本）
+
+在 `index.js` 中设置：
+
+```js
+const AUTH_TOKEN = 'your-token'
+```
+
+设置后，请在请求中携带任一方式：
+
+1. Header（推荐）
+
+```text
+Authorization: Bearer your-token
+```
+
+2. Query 参数
+
+```text
+?token=your-token
+```
+
+若未携带或不匹配，将返回 `401 Unauthorized`。
+
 ## cf worker版本部署
 
 首页：https://workers.cloudflare.com

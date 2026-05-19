@@ -11,6 +11,12 @@ const Config = {
     jsdelivr: 0
 }
 
+// 可选：开启 token 鉴权（推荐在公开部署时启用）
+// 设置后，请在请求中携带：
+// 1) Authorization: Bearer <token>
+// 2) 或 ?token=<token>
+const AUTH_TOKEN = ''
+
 const whiteList = [] // 白名单，路径里面有包含字符的才会通过，e.g. ['/username/']
 
 /** @type {ResponseInit} */
@@ -70,11 +76,22 @@ function checkUrl(u) {
     return false
 }
 
+function checkAuth(req) {
+    if (!AUTH_TOKEN) return true
+    const auth = req.headers.get('authorization') || ''
+    const bearer = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : ''
+    const token = bearer || new URL(req.url).searchParams.get('token') || ''
+    return token === AUTH_TOKEN
+}
+
 /**
  * @param {FetchEvent} e
  */
 async function fetchHandler(e) {
     const req = e.request
+    if (!checkAuth(req)) {
+        return makeRes('Unauthorized', 401)
+    }
     const urlStr = req.url
     const urlObj = new URL(urlStr)
     let path = urlObj.searchParams.get('q')
