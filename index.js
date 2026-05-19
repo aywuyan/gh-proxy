@@ -98,7 +98,10 @@ async function fetchHandler(e) {
     if (tokenFromPath) {
         const targetRaw = decodeURIComponent(parts.slice(1).join('/'))
         // Cloudflare Workers may collapse `//` in path into `/`, so `https://...` can become `https:/...`
-        const target = targetRaw.replace(/^https?:\/\/+/, m => m.toLowerCase().startsWith('https') ? 'https://' : 'http://')
+        // Recover common forms: `https:/example.com/...` -> `https://example.com/...`
+        let target = targetRaw
+        target = target.replace(/^https:\/(?!\/)/i, 'https://')
+        target = target.replace(/^http:\/(?!\/)/i, 'http://')
         if (target.search(/^(?:https?:\/\/)?github\.com\//i) === 0 ||
             target.search(/^(?:https?:\/\/)?raw\.(?:githubusercontent|github)\.com\//i) === 0 ||
             target.search(/^(?:https?:\/\/)?gist\.(?:githubusercontent|github)\.com\//i) === 0) {
