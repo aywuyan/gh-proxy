@@ -96,8 +96,14 @@ async function fetchHandler(e) {
         return makeRes('Unauthorized', 401)
     }
     if (tokenFromPath) {
-        urlObjAuth.pathname = '/' + parts.slice(1).join('/')
-        return fetch(new Request(urlObjAuth.toString(), req))
+        const targetPath = '/' + parts.slice(1).join('/')
+        const target = targetPath.replace(/^\/+/, '')
+        if (target.search(/^(?:https?:\/\/)?github\.com\//i) === 0 ||
+            target.search(/^(?:https?:\/\/)?raw\.(?:githubusercontent|github)\.com\//i) === 0 ||
+            target.search(/^(?:https?:\/\/)?gist\.(?:githubusercontent|github)\.com\//i) === 0) {
+            return httpHandler(req, target)
+        }
+        return makeRes('Invalid target', 400)
     }
     const urlStr = req.url
     const urlObj = new URL(urlStr)
